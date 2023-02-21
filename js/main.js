@@ -10,7 +10,7 @@ suma=suma+part;}
 
 let prom = suma/ cant;
 
-console.log ("Usted tiene en promedio " + prom +" goles por partido")
+alert ("Usted tiene en promedio " + prom +" goles por partido")
 
 function promesa_o_fracaso(prom){
     if(prom>1){
@@ -19,4 +19,4 @@ function promesa_o_fracaso(prom){
         return("Segui participando")
     }
 }
-console.log (promesa_o_fracaso(prom))
+alert (promesa_o_fracaso(prom))
