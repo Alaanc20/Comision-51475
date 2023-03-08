@@ -26,7 +26,7 @@ console.log("Elija el cafe que usted quiera comprar")
 let rta = ""
 
 
-
+do {
     let descripcioncafes = ""
     listacafes.forEach(producto => {
 
@@ -34,9 +34,6 @@ let rta = ""
 
     })
     alert(descripcioncafes)
-
-
-    do {
     let id = prompt("Ingrese el ID del producto a comprar",)
 
     if (!isNaN(id)) {
@@ -63,7 +60,7 @@ let rta = ""
 
     }
 
-    rta = prompt("¿Desea realizar otro pedido? Pulse aceptar para continuar o escriba no para finalizar")
+    rta = prompt("Usted puede seguir comprando, en caso contrario, escriba no para finalizar")
 
 } while (rta != "no")
 
