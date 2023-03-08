@@ -30,7 +30,7 @@ do {
     let descripcioncafes = ""
     listacafes.forEach(producto => {
 
-        descripcioncafes += producto.id + " Cafe " + producto.nombre + " Precio:$ " + producto.precio + " Stock " + producto.stock +" u"+"\n"
+        descripcioncafes += producto.id + " Cafe " + producto.nombre + " Precio: $" + producto.precio + " Stock " + producto.stock +" u"+"\n"
 
     })
     alert(descripcioncafes)
