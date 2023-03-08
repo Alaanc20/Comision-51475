@@ -1,22 +1,70 @@
-suma=0
-let cant = Number(prompt("Ingrese la cantidad de partidos jugados"));
-if(cant<=0){
-    console.log("0 y letras no son un numero valido de partidos")
+
+function totalp(arr) {
+    let resultado = 0;
+    arr.forEach(producto => {
+        resultado = resultado + producto.precio * producto.cantidad
+
+    })
+    return resultado;
+
 }
-for ( i=1; i <= cant; i++) {
+const carro = []
+const listacafes = [{ id: 1, nombre: " Kobe ", precio: 1500, cantidad: 0, stock: 100 },
+{ id: 2, nombre: " Lebron", precio: 1250, cantidad: 0, stock: 100 },
+{ id: 3, nombre: " Ginobilli", precio: 1000, cantidad: 0, stock: 100 },
+{ id: 4, nombre: " Antetokounmpo", precio: 900, cantidad: 0, stock: 100 },
+{ id: 5, nombre: " Luka", precio: 800, cantidad: 0, stock: 100 },
+{ id: 7, nombre: " Bird", precio: 700, cantidad: 0, stock: 100 },
+{ id: 8, nombre: " Shaq", precio: 600, cantidad: 0, stock: 100 },
+{ id: 9, nombre: " Morant", precio: 550, cantidad: 0, stock: 100 },
+]
 
-let part= Number(prompt("Digite la cantidad de goles en el partido " + i))
-suma=suma+part;}
+let i = 0;
 
-let prom = suma/ cant;
+console.log("Elija el cafe que usted quiera comprar")
 
-alert ("Usted tiene en promedio " + prom +" goles por partido")
+let rta = ""
 
-function promesa_o_fracaso(prom){
-    if(prom>1){
-        return("Sos una promesa futbolistica")
-    } else{
-        return("Segui participando")
+
+
+    let descripcioncafes = ""
+    listacafes.forEach(producto => {
+
+        descripcioncafes += producto.id + " Cafe " + producto.nombre + " Precio:$ " + producto.precio + " Stock " + producto.stock +" u"+"\n"
+
+    })
+    alert(descripcioncafes)
+
+
+    do {
+    let id = prompt("Ingrese el ID del producto a comprar",)
+
+    if (!isNaN(id)) {
+
+        if (listacafes.some(producto => producto.id == id)) {
+
+            let cantidad = prompt(" ¿Cuantos quieres?")
+            let stock = 0
+            const producto = listacafes.find(producto => producto.id == id)
+            if (producto.stock > cantidad) {
+
+                producto.cantidad = stock;
+                producto.cantidad = cantidad;
+                carro.push(producto)
+
+            } else {
+                alert("Lo sentimos no tenemos stock, vuelva a pedir nuevamente " + producto.stock + " unidades en stock restante")
+            }
+
+        } else {
+            console.log("ID no valido")
+        }
+
+
     }
-}
-alert (promesa_o_fracaso(prom))
+
+    rta = prompt("¿Desea realizar otro pedido? Pulse aceptar para continuar o escriba no para finalizar")
+
+} while (rta != "no")
+
+alert("El total de su compra es: " + totalp(carro));
