@@ -1,67 +1,146 @@
+class ProductoController {
+    constructor() {
+        this.listacafes = []
+    }
+    levantar() {
+        let obtenerListaJSON = localStorage.getItem("listacafes")
 
-function totalp(arr) {
-    let resultado = 0;
-    arr.forEach(producto => {
-        resultado = resultado + producto.precio * producto.cantidad
-
-    })
-    return resultado;
-
-}
-const carro = []
-const listacafes = [{ id: 1, nombre: " Kobe ", precio: 1500, cantidad: 0, stock: 100 },
-{ id: 2, nombre: " Lebron", precio: 1250, cantidad: 0, stock: 100 },
-{ id: 3, nombre: " Ginobilli", precio: 1000, cantidad: 0, stock: 100 },
-{ id: 4, nombre: " Antetokounmpo", precio: 900, cantidad: 0, stock: 100 },
-{ id: 5, nombre: " Luka", precio: 800, cantidad: 0, stock: 100 },
-{ id: 7, nombre: " Bird", precio: 700, cantidad: 0, stock: 100 },
-{ id: 8, nombre: " Shaq", precio: 600, cantidad: 0, stock: 100 },
-{ id: 9, nombre: " Morant", precio: 550, cantidad: 0, stock: 100 },
-]
-
-let i = 0;
-
-console.log("Elija el cafe que usted quiera comprar")
-
-let rta = ""
-
-
-do {
-    let descripcioncafes = ""
-    listacafes.forEach(producto => {
-
-        descripcioncafes += producto.id + " Cafe " + producto.nombre + " Precio: $" + producto.precio + " Stock " + producto.stock +" u"+"\n"
-
-    })
-    alert(descripcioncafes)
-    let id = prompt("Ingrese el ID del producto a comprar",)
-
-    if (!isNaN(id)) {
-
-        if (listacafes.some(producto => producto.id == id)) {
-
-            let cantidad = prompt(" ¿Cuantos quieres?")
-            let stock = 0
-            const producto = listacafes.find(producto => producto.id == id)
-            if (producto.stock > cantidad) {
-
-                producto.cantidad = stock;
-                producto.cantidad = cantidad;
-                carro.push(producto)
-
-            } else {
-                alert("Lo sentimos no tenemos stock, vuelva a pedir nuevamente " + producto.stock + " unidades en stock restante")
-            }
-
-        } else {
-            console.log("ID no valido")
+        if (obtenerListaJSON) {
+            this.listacafes = JSON.parse(obtenerListaJSON)
         }
-
-
     }
 
-    rta = prompt("Usted puede seguir comprando, en caso contrario, escriba no para finalizar")
+    mostrarEnDOM(contenedor_productos) {
 
-} while (rta != "no")
+        contenedor_productos.innerHTML = ""
 
-alert("El total de su compra es: " + totalp(carro));
+        this.listacafes.forEach(producto => {
+            contenedor_productos.innerHTML += `
+                    <div class="card" style="width: 18rem;">
+                        <img src="${producto.img}" alt="Cafes">
+                            <div class="card-body">
+                                <h5 class="card-title">${producto.nombre}</h5>
+                                <p class="card-text">${producto.descripcion}</p>
+                                <p>Precio: <strong>$${producto.precio}</p></strong>
+                                <a href="#" class="btn btn-primary d-flex justify-content-center" id="cof${producto.id}">Añadir al carrito</a>
+                            </div>
+                    </div>
+            `
+        })
+    }
+}
+
+class CarritoController {
+    constructor() {
+        this.listaCarrito = []
+    }
+
+    levantar() {
+        let obtenerListaJSON = localStorage.getItem("listaCarrito")
+        if (obtenerListaJSON) {
+            this.listaCarrito = JSON.parse(obtenerListaJSON)
+        }
+    }
+
+    anadir(producto) {
+        this.listaCarrito.push(producto)
+
+        let formatoJSON = JSON.stringify(this.listaCarrito)
+
+        localStorage.setItem("listaCarrito", formatoJSON)
+    }
+
+    mostrarEnDOM(contenedor_carrito) {
+
+        contenedor_carrito.innerHTML = ""
+
+        this.listaCarrito.forEach(producto => {
+            contenedor_carrito.innerHTML += `
+            <div class="card mb-3" style="max-width: 540px;">
+            <div class="row g-0">
+            <div class="col-md-4">
+            <img src="${producto.img}" class="img-fluid rounded-start" alt="${producto.nombre}">
+            </div>
+            <div class="col-md-8">
+            <div class="card-body">
+            <h5 class="card-title">${producto.nombre}</h5>
+            <p class="card-text">${producto.descripcion}</p>
+                        <p class="card-text"><small class="text-muted">$${producto.precio}</small></p>
+                        </div>
+                    </div>
+                    </div>
+                    </div>
+                    `
+        })
+    }
+
+    limpiar() {
+        this.listaCarrito = []
+        localStorage.removeItem("listaCarrito")
+    }
+}
+
+
+const controladorProductos = new ProductoController()
+const controladorCarrito = new CarritoController()
+
+
+controladorProductos.levantar()
+controladorCarrito.levantar()
+
+
+const contenedor_productos = document.getElementById("contenedor_productos")
+const contenedor_carrito = document.getElementById("contenedor_carrito")
+const finalizar_compra = document.getElementById("finalizar_compra")
+
+
+controladorProductos.mostrarEnDOM(contenedor_productos)
+controladorCarrito.mostrarEnDOM(contenedor_carrito)
+
+
+controladorProductos.listacafes.forEach(producto => {
+    const productoEnCarrito = document.getElementById(`cof${producto.id}`)
+
+    productoEnCarrito.addEventListener("click", () => {
+
+        controladorCarrito.anadir(producto)
+
+        controladorCarrito.levantar()
+
+        controladorCarrito.mostrarEnDOM(contenedor_carrito)
+        Toastify({
+            text: "Agregado al pedido!",
+            duration: 2000,
+            gravity: "bottom",
+            position: "right",
+            style: {
+                background: "linear-gradient(to right, #ffafbd , #ffc3a0)",
+                color: "Black"
+
+            },
+        }).showToast();
+    })
+})
+finalizar_compra.addEventListener("click", () => {
+    if (controladorCarrito.listaCarrito.length > 0) {
+
+        controladorCarrito.limpiar()
+        controladorCarrito.mostrarEnDOM(contenedor_carrito)
+
+        Swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'Compra realizada!',
+            showConfirmButton: false,
+            timer: 2000
+        })
+    } else {
+        Swal.fire({
+            position: 'center',
+            icon: 'warning',
+            title: 'Pedido Vacio',
+            showConfirmButton: false,
+            timer: 2000
+        })
+    }
+})
