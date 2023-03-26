@@ -1,146 +1,148 @@
-class ProductoController {
-    constructor() {
-        this.listacafes = []
-    }
-    levantar() {
-        let obtenerListaJSON = localStorage.getItem("listacafes")
+const shopContent = document.getElementById("shopContent");
+const verCarrito = document.getElementById("verCarrito");
+const modalContainer = document.getElementById("modal-container");
+const showAlert = document.getElementById("showAlert");
+const cantidadCarrito = document.getElementById("cantidadCarrito");
 
-        if (obtenerListaJSON) {
-            this.listacafes = JSON.parse(obtenerListaJSON)
+let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+productos.forEach((product) => {
+    let content = document.createElement("div");
+    content.className = "card";
+    content.innerHTML = `
+    <img src="${product.img}">
+    <h3>${product.nombre}</h3>
+    <p>${product.descripcion} $</p>
+    <p class="price">${product.precio} $</p>
+`;
+
+    shopContent.append(content);
+
+    let comprar = document.createElement("button");
+    comprar.innerText = "Agregar al pedido";
+    comprar.className = "Agregar al pedido";
+
+    content.append(comprar);
+
+    comprar.addEventListener("click", () => {
+        const repeat = carrito.some((repeatProduct) => repeatProduct.id === product.id);
+        if (repeat) {
+            carrito.map((prod) => {
+                if (prod.id === product.id) {
+                    prod.cantidad++;
+                }
+            });
+        } else {
+            carrito.push({
+                id: product.id,
+                img: product.img,
+                nombre: product.nombre,
+                precio: product.precio,
+                cantidad: product.cantidad,
+            });
+            console.log(carrito);
+            console.log(carrito.length);
+            carritoCounter();
+            saveLocal();
         }
-    }
+    });
+});
+const pintarCarrito = () => {
+    modalContainer.innerHTML = "";
+    modalContainer.style.display = "flex";
+    const modalHeader = document.createElement("div");
+    modalHeader.className = "modal-header";
+    modalHeader.innerHTML = `
+        <h1 class="modal-header-title">Carrito.</h1>
+`;
+    modalContainer.append(modalHeader);
 
-    mostrarEnDOM(contenedor_productos) {
+    const modalbutton = document.createElement("h1");
+    modalbutton.innerText = "x";
+    modalbutton.className = "modal-header-button";
 
-        contenedor_productos.innerHTML = ""
+    modalbutton.addEventListener("click", () => {
+        modalContainer.style.display = "none";
+    });
 
-        this.listacafes.forEach(producto => {
-            contenedor_productos.innerHTML += `
-                    <div class="card" style="width: 18rem;">
-                        <img src="${producto.img}" alt="Cafes">
-                            <div class="card-body">
-                                <h5 class="card-title">${producto.nombre}</h5>
-                                <p class="card-text">${producto.descripcion}</p>
-                                <p>Precio: <strong>$${producto.precio}</p></strong>
-                                <a href="#" class="btn btn-primary d-flex justify-content-center" id="cof${producto.id}">Añadir al carrito</a>
-                            </div>
-                    </div>
-            `
-        })
-    }
-}
+    modalHeader.append(modalbutton);
 
-class CarritoController {
-    constructor() {
-        this.listaCarrito = []
-    }
+    carrito.forEach((product) => {
+        let carritoContent = document.createElement("div");
+        carritoContent.className = "modal-content";
+        carritoContent.innerHTML = `
+          <img src="${product.img}">
+          <h3>${product.nombre}</h3>
+          <p>${product.precio} $</p>
+          <span class="restar"> - </span>
+          
+          <p>${product.cantidad}</p>
+          <span class="sumar"> + </span>
+          <p>Total: ${product.cantidad * product.precio} $</p>
+          <span class="delete-product"> ❌ </span>
+        `;
 
-    levantar() {
-        let obtenerListaJSON = localStorage.getItem("listaCarrito")
-        if (obtenerListaJSON) {
-            this.listaCarrito = JSON.parse(obtenerListaJSON)
-        }
-    }
+        modalContainer.append(carritoContent);
 
-    anadir(producto) {
-        this.listaCarrito.push(producto)
+        let restar = carritoContent.querySelector(".restar");
 
-        let formatoJSON = JSON.stringify(this.listaCarrito)
+        restar.addEventListener("click", () => {
+            if (product.cantidad !== 1) {
+                product.cantidad--;
+            }
+            saveLocal();
+            pintarCarrito();
+        });
 
-        localStorage.setItem("listaCarrito", formatoJSON)
-    }
+        let sumar = carritoContent.querySelector(".sumar");
+        sumar.addEventListener("click", () => {
+            product.cantidad++;
+            saveLocal();
+            pintarCarrito();
+        });
 
-    mostrarEnDOM(contenedor_carrito) {
+        let eliminar = carritoContent.querySelector(".delete-product");
 
-        contenedor_carrito.innerHTML = ""
+        eliminar.addEventListener("click", () => {
+            eliminarProducto(product.id);
+        });
+    });
 
-        this.listaCarrito.forEach(producto => {
-            contenedor_carrito.innerHTML += `
-            <div class="card mb-3" style="max-width: 540px;">
-            <div class="row g-0">
-            <div class="col-md-4">
-            <img src="${producto.img}" class="img-fluid rounded-start" alt="${producto.nombre}">
-            </div>
-            <div class="col-md-8">
-            <div class="card-body">
-            <h5 class="card-title">${producto.nombre}</h5>
-            <p class="card-text">${producto.descripcion}</p>
-                        <p class="card-text"><small class="text-muted">$${producto.precio}</small></p>
-                        </div>
-                    </div>
-                    </div>
-                    </div>
-                    `
-        })
-    }
+    const total = carrito.reduce((acc, el) => acc + el.precio * el.cantidad, 0);
 
-    limpiar() {
-        this.listaCarrito = []
-        localStorage.removeItem("listaCarrito")
-    }
-}
+    const totalBuying = document.createElement("div");
+    totalBuying.className = "total-content";
+    totalBuying.innerHTML = `Total a pagar: ${total} $`;
+    modalContainer.append(totalBuying);
+};
 
+verCarrito.addEventListener("click", pintarCarrito);
 
-const controladorProductos = new ProductoController()
-const controladorCarrito = new CarritoController()
+const eliminarProducto = (id) => {
+    const foundId = carrito.find((element) => element.id === id);
 
+    console.log(foundId);
 
-controladorProductos.levantar()
-controladorCarrito.levantar()
+    carrito = carrito.filter((carritoId) => {
+        return carritoId !== foundId;
+    });
 
+    carritoCounter();
+    saveLocal();
+    pintarCarrito();
+};
 
-const contenedor_productos = document.getElementById("contenedor_productos")
-const contenedor_carrito = document.getElementById("contenedor_carrito")
-const finalizar_compra = document.getElementById("finalizar_compra")
+const carritoCounter = () => {
+    cantidadCarrito.style.display = "block";
 
+    const carritoLength = carrito.length;
 
-controladorProductos.mostrarEnDOM(contenedor_productos)
-controladorCarrito.mostrarEnDOM(contenedor_carrito)
+    localStorage.setItem("carritoLength", JSON.stringify(carritoLength));
 
+    cantidadCarrito.innerText = JSON.parse(localStorage.getItem("carritoLength"));
+};
 
-controladorProductos.listacafes.forEach(producto => {
-    const productoEnCarrito = document.getElementById(`cof${producto.id}`)
-
-    productoEnCarrito.addEventListener("click", () => {
-
-        controladorCarrito.anadir(producto)
-
-        controladorCarrito.levantar()
-
-        controladorCarrito.mostrarEnDOM(contenedor_carrito)
-        Toastify({
-            text: "Agregado al pedido!",
-            duration: 2000,
-            gravity: "bottom",
-            position: "right",
-            style: {
-                background: "linear-gradient(to right, #ffafbd , #ffc3a0)",
-                color: "Black"
-
-            },
-        }).showToast();
-    })
-})
-finalizar_compra.addEventListener("click", () => {
-    if (controladorCarrito.listaCarrito.length > 0) {
-
-        controladorCarrito.limpiar()
-        controladorCarrito.mostrarEnDOM(contenedor_carrito)
-
-        Swal.fire({
-            position: 'center',
-            icon: 'success',
-            title: 'Compra realizada!',
-            showConfirmButton: false,
-            timer: 2000
-        })
-    } else {
-        Swal.fire({
-            position: 'center',
-            icon: 'warning',
-            title: 'Pedido Vacio',
-            showConfirmButton: false,
-            timer: 2000
-        })
-    }
-})
+carritoCounter();
+const saveLocal = () => {
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+};
